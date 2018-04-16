@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
@@ -22,21 +23,23 @@ namespace WPFSerialAssistant
         Character,  //字符
         Hex         //十六进制
     }
+
     public partial class MainWindow : Window
     {
         #region Global
+
         // 接收并显示的方式
         private ReceiveMode receiveMode = ReceiveMode.Character;
 
         // 发送的方式
         private SendMode sendMode = SendMode.Character;
 
-        #endregion
+        #endregion Global
 
         #region Event handler for menu items
+
         private void saveSerialDataMenuItem_Click(object sender, RoutedEventArgs e)
         {
-
         }
 
         private void saveConfigMenuItem_Click(object sender, RoutedEventArgs e)
@@ -137,16 +140,17 @@ namespace WPFSerialAssistant
         private void aboutMenuItem_Click(object sender, RoutedEventArgs e)
         {
             WPFSerialAssistant.About about = new About();
-            about.ShowDialog();            
+            about.ShowDialog();
         }
 
         private void helpMenuItem_Click(object sender, RoutedEventArgs e)
         {
-
         }
-        #endregion
+
+        #endregion Event handler for menu items
 
         #region Event handler for buttons and so on.
+
         private void openClosePortButton_Click(object sender, RoutedEventArgs e)
         {
             if (serialPort.IsOpen)
@@ -229,22 +233,27 @@ namespace WPFSerialAssistant
                         receiveMode = ReceiveMode.Character;
                         Information("提示：字符显示模式。");
                         break;
+
                     case "hex":
                         receiveMode = ReceiveMode.Hex;
                         Information("提示：十六进制显示模式。");
                         break;
+
                     case "dec":
                         receiveMode = ReceiveMode.Decimal;
                         Information("提示：十进制显示模式。");
                         break;
+
                     case "oct":
                         receiveMode = ReceiveMode.Octal;
                         Information("提示：八进制显示模式。");
                         break;
+
                     case "bin":
                         receiveMode = ReceiveMode.Binary;
                         Information("提示：二进制显示模式。");
                         break;
+
                     default:
                         break;
                 }
@@ -252,6 +261,7 @@ namespace WPFSerialAssistant
         }
 
         private bool showReceiveData = true;
+
         private void showRecvDataCheckBox_Click(object sender, RoutedEventArgs e)
         {
             showReceiveData = (bool)showRecvDataCheckBox.IsChecked;
@@ -271,12 +281,14 @@ namespace WPFSerialAssistant
                         // 将文本框中内容转换成char
                         sendDataTextBox.Text = Utilities.ToSpecifiedText(sendDataTextBox.Text, SendMode.Character, serialPort.Encoding);
                         break;
+
                     case "hex":
                         // 将文本框中的内容转换成hex
                         sendMode = SendMode.Hex;
                         Information("提示：发送十六进制。输入十六进制数据之间用空格隔开，如：1D 2A 38。");
                         sendDataTextBox.Text = Utilities.ToSpecifiedText(sendDataTextBox.Text, SendMode.Hex, serialPort.Encoding);
                         break;
+
                     default:
                         break;
                 }
@@ -285,12 +297,10 @@ namespace WPFSerialAssistant
 
         private void manualInputRadioButton_Click(object sender, RoutedEventArgs e)
         {
-
         }
 
         private void loadFileRadioButton_Click(object sender, RoutedEventArgs e)
         {
-
         }
 
         private void clearSendDataTextBox_Click(object sender, RoutedEventArgs e)
@@ -308,31 +318,37 @@ namespace WPFSerialAssistant
                     case "none":
                         appendContent = "";
                         break;
+
                     case "return":
                         appendContent = "\r";
                         break;
+
                     case "newline":
                         appendContent = "\n";
                         break;
+
                     case "retnewline":
                         appendContent = "\r\n";
                         break;
+
                     default:
                         break;
                 }
                 Information("发送追加：" + rb.Content.ToString());
             }
         }
-        #endregion
+
+        #endregion Event handler for buttons and so on.
 
         #region Event handler for timers
+
         private void ClockTimer_Tick(object sender, EventArgs e)
         {
             UpdateTimeDate();
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -400,10 +416,10 @@ namespace WPFSerialAssistant
             }
         }
 
-        #endregion
+        #endregion Event handler for timers
 
         #region EventHandler for serialPort
-        
+
         // 数据接收缓冲区
         private List<byte> receiveBuffer = new List<byte>();
 
@@ -451,25 +467,27 @@ namespace WPFSerialAssistant
                     //    recvDataRichTextBox.AppendText("Process data.\n");
                     //}));
                     // 进行数据处理，采用新的线程进行处理。
-                    Thread dataHandler = new Thread(new ParameterizedThreadStart(ReceivedDataHandler));
-                    dataHandler.Start(receiveBuffer);
+                    //Thread dataHandler = new Thread(new ParameterizedThreadStart(ReceivedDataHandler));
+                    //dataHandler.Start(receiveBuffer);
+
+                    var task = Task.Run(() => { ReceivedDataHandler(receiveBuffer); });
                 }
 
                 // 启动定时器，防止因为一直没有到达缓冲区字节阈值，而导致接收到的数据一直留存在缓冲区中无法处理。
                 StartCheckTimer();
 
                 this.Dispatcher.Invoke(new Action(() =>
-                {   
+                {
                     if (autoSendEnableCheckBox.IsChecked == false)
                     {
                         Information("");
-                    }                                 
+                    }
                     dataRecvStatusBarItem.Visibility = Visibility.Visible;
                 }));
             }
         }
 
-        #endregion
+        #endregion EventHandler for serialPort
 
         #region 数据处理
 
@@ -483,16 +501,16 @@ namespace WPFSerialAssistant
             {
                 //recvDataRichTextBox.AppendText("Timeout!\n");
                 // 进行数据处理，采用新的线程进行处理。
-                Thread dataHandler = new Thread(new ParameterizedThreadStart(ReceivedDataHandler));
-                dataHandler.Start(receiveBuffer);
-            }          
+                //Thread dataHandler = new Thread(new ParameterizedThreadStart(ReceivedDataHandler));
+                //dataHandler.Start(receiveBuffer);
+                var task = Task.Run(() => { ReceivedDataHandler(receiveBuffer); });
+            }
         }
 
-
-        private void ReceivedDataHandler(object obj)
+        private void ReceivedDataHandler(List<byte> obj)
         {
             List<byte> recvBuffer = new List<byte>();
-            recvBuffer.AddRange((List<byte>)obj);
+            recvBuffer.AddRange(obj);
 
             if (recvBuffer.Count == 0)
             {
@@ -517,6 +535,7 @@ namespace WPFSerialAssistant
             // TO-DO：
             // 处理数据，比如解析指令等等
         }
-        #endregion
+
+        #endregion 数据处理
     }
 }
