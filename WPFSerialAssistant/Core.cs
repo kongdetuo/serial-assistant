@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
 //using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
@@ -28,22 +29,13 @@ namespace WPFSerialAssistant
         }
 
         #region 状态栏
+
         /// <summary>
         /// 更新时间信息
         /// </summary>
         private void UpdateTimeDate()
         {
-            string timeDateString = "";
-            DateTime now = DateTime.Now;
-            timeDateString = string.Format("{0}年{1}月{2}日 {3}:{4}:{5}", 
-                now.Year, 
-                now.Month.ToString("00"), 
-                now.Day.ToString("00"), 
-                now.Hour.ToString("00"), 
-                now.Minute.ToString("00"), 
-                now.Second.ToString("00"));
-
-            timeDateTextBlock.Text = timeDateString;
+            timeDateTextBlock.Text = DateTime.Now.ToString("yyyy年M月dd日 hh:mm:ss");
         }
 
         /// <summary>
@@ -76,7 +68,7 @@ namespace WPFSerialAssistant
             statusInfoTextBlock.Text = message;
         }
 
-        #endregion
+        #endregion 状态栏
 
         private void RecvDataBoxAppend(string textData)
         {
@@ -123,10 +115,10 @@ namespace WPFSerialAssistant
             Information("串口自动发送数据中...");
         }
 
-        private int GetAutoSendDataInterval()
+        private TimeSpan GetAutoSendDataInterval()
         {
             int interval = 1000;
-
+            var ts = TimeSpan.FromMilliseconds(1000);
             if (int.TryParse(autoSendIntervalTextBox.Text.Trim(), out interval) == true)
             {
                 string select = timeUnitComboBox.Text.Trim();
@@ -134,23 +126,32 @@ namespace WPFSerialAssistant
                 switch (select)
                 {
                     case "毫秒":
+                        ts = TimeSpan.FromMilliseconds(interval);
                         break;
+
                     case "秒钟":
-                        interval *= 1000;
+                        ts = TimeSpan.FromSeconds(interval);
                         break;
+
                     case "分钟":
-                        interval = interval * 60 * 1000;
+                        ts = TimeSpan.FromMinutes(interval);
                         break;
+
                     default:
                         break;
                 }
             }
+            else
+            {
+                autoSendIntervalTextBox.Text = "1000";
+            }
 
-            return interval;
+            return ts;
         }
 
         #region 配置信息
-        // 
+
+        //
         // 目前保存的配置信息如下：
         // 1. 波特率
         // 2. 奇偶校验位
@@ -198,7 +199,7 @@ namespace WPFSerialAssistant
             config.Add("timeUnit", timeUnitComboBox.SelectedIndex);
 
             // 窗口状态信息
-            config.Add("maxmized", this.WindowState == WindowState.Maximized);  
+            config.Add("maxmized", this.WindowState == WindowState.Maximized);
             config.Add("windowWidth", this.Width);
             config.Add("windowHeight", this.Height);
             config.Add("windowLeft", this.Left);
@@ -218,7 +219,6 @@ namespace WPFSerialAssistant
 
             // 保存发送追加
             config.Add("appendContent", appendContent);
-
 
             // 保存配置信息到磁盘中
             Configuration.Save(config, @"Config\default.conf");
@@ -331,18 +331,23 @@ namespace WPFSerialAssistant
                 case ReceiveMode.Character:
                     recvCharacterRadioButton.IsChecked = true;
                     break;
+
                 case ReceiveMode.Hex:
                     recvHexRadioButton.IsChecked = true;
                     break;
+
                 case ReceiveMode.Decimal:
                     recvDecRadioButton.IsChecked = true;
                     break;
+
                 case ReceiveMode.Octal:
                     recvOctRadioButton.IsChecked = true;
                     break;
+
                 case ReceiveMode.Binary:
                     recvBinRadioButton.IsChecked = true;
                     break;
+
                 default:
                     break;
             }
@@ -358,35 +363,42 @@ namespace WPFSerialAssistant
                 case SendMode.Character:
                     sendCharacterRadioButton.IsChecked = true;
                     break;
+
                 case SendMode.Hex:
                     sendHexRadioButton.IsChecked = true;
                     break;
+
                 default:
                     break;
             }
 
             //加载追加内容
-           appendContent = config.GetString("appendContent");
+            appendContent = config.GetString("appendContent");
 
             switch (appendContent)
             {
                 case "":
                     appendNoneRadioButton.IsChecked = true;
                     break;
+
                 case "\r":
                     appendReturnRadioButton.IsChecked = true;
                     break;
+
                 case "\n":
                     appednNewLineRadioButton.IsChecked = true;
                     break;
+
                 case "\r\n":
                     appendReturnNewLineRadioButton.IsChecked = true;
                     break;
+
                 default:
                     break;
             }
             return true;
         }
-        #endregion
+
+        #endregion 配置信息
     }
 }

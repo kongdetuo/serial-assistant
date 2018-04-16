@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -222,8 +223,7 @@ namespace WPFSerialAssistant
             if (rb != null)
             {
                 //
-                // TO-DO:
-                // 可以将已经存在在文本框中的内容全部转换成指定形式显示，而不是简单地清空
+                // todo可以将已经存在在文本框中的内容全部转换成指定形式显示，而不是简单地清空
                 //
                 recvDataRichTextBox.Document.Blocks.Clear();
 
@@ -439,7 +439,7 @@ namespace WPFSerialAssistant
         /// <param name="e"></param>
         private void SerialPort_DataReceived(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
         {
-            System.IO.Ports.SerialPort sp = sender as System.IO.Ports.SerialPort;
+            SerialPort sp = sender as SerialPort;
 
             if (sp != null)
             {
@@ -462,14 +462,7 @@ namespace WPFSerialAssistant
 
                 if (receiveBuffer.Count >= THRESH_VALUE)
                 {
-                    //Dispatcher.Invoke(new Action(() =>
-                    //{
-                    //    recvDataRichTextBox.AppendText("Process data.\n");
-                    //}));
-                    // 进行数据处理，采用新的线程进行处理。
-                    //Thread dataHandler = new Thread(new ParameterizedThreadStart(ReceivedDataHandler));
-                    //dataHandler.Start(receiveBuffer);
-
+                    // 异步进行数据处理
                     var task = Task.Run(() => { ReceivedDataHandler(receiveBuffer); });
                 }
 
@@ -499,10 +492,7 @@ namespace WPFSerialAssistant
             // 只有没有到达阈值的情况下才会强制其启动新的线程处理缓冲区数据。
             if (receiveBuffer.Count < THRESH_VALUE)
             {
-                //recvDataRichTextBox.AppendText("Timeout!\n");
-                // 进行数据处理，采用新的线程进行处理。
-                //Thread dataHandler = new Thread(new ParameterizedThreadStart(ReceivedDataHandler));
-                //dataHandler.Start(receiveBuffer);
+                // 异步进行数据处理
                 var task = Task.Run(() => { ReceivedDataHandler(receiveBuffer); });
             }
         }
@@ -532,8 +522,7 @@ namespace WPFSerialAssistant
                 dataRecvStatusBarItem.Visibility = Visibility.Collapsed;
             }));
 
-            // TO-DO：
-            // 处理数据，比如解析指令等等
+            // todo 处理数据，比如解析指令等等
         }
 
         #endregion 数据处理

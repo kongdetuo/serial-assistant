@@ -234,7 +234,14 @@
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Grid.Column="0" TextAlignment="Center" Padding="5">自动发送时间间隔</TextBlock>
-                                    <TextBox Name="autoSendIntervalTextBox" Text="1000" Grid.Column="1" Margin="10,0" Padding="5" Width="100" ToolTip="自动发送时间只有在启动自动发送前修改有效；发送过程中修改时间只会在下一次启动自动发送时生效。"></TextBox>
+                                    <TextBox
+                                        Name="autoSendIntervalTextBox"
+                                        Text="1000"
+                                        Grid.Column="1"
+                                        Margin="10,0"
+                                        Padding="5"
+                                        Width="100"
+                                        ToolTip="自动发送时间只有在启动自动发送前修改有效；发送过程中修改时间只会在下一次启动自动发送时生效。" />
                                     <ComboBox Name="timeUnitComboBox" Grid.Column="2" Padding="5" Width="60">
                                         <ComboBoxItem IsSelected="True">毫秒</ComboBoxItem>
                                         <ComboBoxItem>秒钟</ComboBoxItem>

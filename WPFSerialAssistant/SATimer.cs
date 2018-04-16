@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+
 //using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
@@ -37,10 +38,10 @@ namespace WPFSerialAssistant
             autoSendDataTimer.Tick += AutoSendDataTimer_Tick;
         }
 
-        private void StartAutoSendDataTimer(int interval)
+        private void StartAutoSendDataTimer(TimeSpan timeSpan)
         {
             autoSendDataTimer.IsEnabled = true;
-            autoSendDataTimer.Interval = TimeSpan.FromMilliseconds(interval);
+            autoSendDataTimer.Interval = timeSpan;
             autoSendDataTimer.Start();
         }
 
