@@ -4,6 +4,7 @@ using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading;
+
 //using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
@@ -114,7 +115,7 @@ namespace WPFSerialAssistant
         {
             string select = parityComboBox.Text;
 
-            Parity p = Parity.None;       
+            Parity p = Parity.None;
             if (select.Contains("Odd"))
             {
                 p = Parity.Odd;
@@ -131,7 +132,7 @@ namespace WPFSerialAssistant
             {
                 p = Parity.Mark;
             }
-           
+
             return p;
         }
 
@@ -192,6 +193,7 @@ namespace WPFSerialAssistant
         }
 
         private string appendContent = "\n";
+
         private bool SerialPortWrite(string textData, bool reportEnable)
         {
             if (serialPort == null)
@@ -216,16 +218,21 @@ namespace WPFSerialAssistant
                 }
                 else if (sendMode == SendMode.Hex)
                 {
-                    string[] grp = textData.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    //string[] grp = textData.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-                    List<byte> list = new List<byte>();
+                    //List<byte> list = new List<byte>();
 
-                    foreach (var item in grp)
-                    {
-                        list.Add(Convert.ToByte(item, 16));
-                    }
-             
-                    serialPort.Write(list.ToArray(), 0, list.Count);
+                    //foreach (var item in grp)
+                    //{
+                    //    list.Add(Convert.ToByte(item, 16));
+                    //}
+
+                    var v = textData
+                        .SplitWithoutEmpty()
+                        .Select(item => Convert.ToByte(item, 16))
+                        .ToArray();
+
+                    serialPort.Write(v, 0, v.Length);
                 }
 
                 if (reportEnable)
@@ -244,10 +251,12 @@ namespace WPFSerialAssistant
         }
 
         #region 定时器
+
         /// <summary>
         /// 超时时间为50ms
         /// </summary>
         private const int TIMEOUT = 50;
+
         private void InitCheckTimer()
         {
             // 如果缓冲区中有数据，并且定时时间达到前依然没有得到处理，将会自动触发处理函数。
@@ -267,6 +276,7 @@ namespace WPFSerialAssistant
             checkTimer.IsEnabled = false;
             checkTimer.Stop();
         }
-        #endregion
+
+        #endregion 定时器
     }
 }
