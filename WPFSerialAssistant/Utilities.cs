@@ -32,80 +32,69 @@ namespace WPFSerialAssistant
             return textData.Split(" ".ToArray(), StringSplitOptions.RemoveEmptyEntries);
         }
 
+        /// <summary>
+        /// 将 byte 转换为长度为8的二进制字符串
+        /// </summary>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static string ToString2(this byte b)
+        {
+            var str = Convert.ToString(b, 2);
+            var sb = new StringBuilder();
+            if (str.Length < 8)
+            {
+                sb.Append('0', 8 - str.Length);
+            }
+            sb.Append(str);
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// 使用指定编码将一个字节序列解码为一个字符串
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <param name="encoding"></param>
+        /// <returns></returns>
+        public static string GetString(this byte[] bytes, Encoding encoding)
+        {
+            return encoding.GetString(bytes);
+        }
+
         public static string BytesToText(List<byte> bytesBuffer, ReceiveMode mode, Encoding encoding)
         {
-            //StringBuilder sb = new StringBuilder();
-            ////string result = "";
-
-            //if (mode == ReceiveMode.Character)
-            //{
-            //    return encoding.GetString(bytesBuffer.ToArray<byte>());
-            //}
-
-            //foreach (var item in bytesBuffer)
-            //{
-            //    switch (mode)
-            //    {
-            //        case ReceiveMode.Hex:
-            //            {
-            //                string tmp = Convert.ToString(item, 16).ToUpper();
-            //                if (tmp.Length < 2)
-            //                {
-            //                    sb.Append("0");
-            //                }
-            //                sb.Append(tmp).Append(" ");
-            //            }
-            //            break;
-
-            //        case ReceiveMode.Decimal:
-            //            sb.Append(Convert.ToString(item, 10)).Append(" ");
-            //            break;
-
-            //        case ReceiveMode.Octal:
-            //            sb.Append(Convert.ToString(item, 8)).Append(" ");
-            //            break;
-
-            //        case ReceiveMode.Binary:
-            //            {
-            //                string tmp = Convert.ToString(item, 2);
-            //                if (tmp.Length < 8)
-            //                {
-            //                    sb.Append('0', 8 - tmp.Length);
-            //                }
-            //                sb.Append(tmp).Append(" ");
-            //            }
-            //            break;
-
-            //        default:
-            //            break;
-            //    }
-            //}
-
-            var str = "";
+            var result = "";
             switch (mode)
             {
                 case ReceiveMode.Character:
-                    str = encoding.GetString(bytesBuffer.ToArray());
+                    result = encoding.GetString(bytesBuffer.ToArray());
                     break;
 
                 case ReceiveMode.Hex:
-                    str = string.Join(" ", bytesBuffer.Select(item => item.ToString("X2")));
+                    result = bytesBuffer
+                        .Select(item => item.ToString("X2"))
+                        .Join();
                     break;
 
                 case ReceiveMode.Decimal:
-                    str = string.Join(" ", bytesBuffer.Select(item => item.ToString("D")));
+                    result = bytesBuffer
+                        .Select(item => item.ToString("D"))
+                        .Join();
                     break;
 
                 case ReceiveMode.Octal:
-                    str = string.Join(" ", bytesBuffer.Select(item => Convert.ToString(item, 8)));
+                    result = bytesBuffer
+                        .Select(item => Convert.ToString(item, 8))
+                        .Join();
                     break;
 
                 case ReceiveMode.Binary:
-                    str = string.Join(" ", bytesBuffer.Select(item => Convert.ToString(item, 2)));
+                    result = bytesBuffer
+                        .Select(item => item.ToString2())
+                        .Join();
                     break;
             }
 
-            return str;
+            return result;
         }
 
         public static string ToSpecifiedText(string text, SendMode mode, Encoding encoding)
@@ -114,36 +103,14 @@ namespace WPFSerialAssistant
             switch (mode)
             {
                 case SendMode.Character:
-                    //text = text.Trim();
-
-                    //// 转换成字节
-                    //List<byte> src = new List<byte>();
-
-                    //string[] grp = text.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-                    //foreach (var item in grp)
-                    //{
-                    //    src.Add(Convert.ToByte(item, 16));
-                    //}
-
-                    //// 转换成字符串
-                    //result = encoding.GetString(src.ToArray<byte>());
-
-                    result = encoding.GetString(text
-                        .SplitWithoutEmpty()
-                        .Select(item => Convert.ToByte(item, 16))
-                        .ToArray());
+                    result = text
+                        .SplitWithoutEmpty()                        //分割字符串
+                        .Select(item => Convert.ToByte(item, 16))   //转换为byte
+                        .ToArray()
+                        .GetString(encoding);
                     break;
 
                 case SendMode.Hex:
-
-                    //byte[] byteStr = encoding.GetBytes(text.ToCharArray());
-
-                    //foreach (var item in byteStr)
-                    //{
-                    //    result += Convert.ToString(item, 16).ToUpper() + " ";
-                    //}
-
                     result = encoding
                         .GetBytes(text.ToArray())
                         .Select(item => item.ToString("X")) // 转换为16进制

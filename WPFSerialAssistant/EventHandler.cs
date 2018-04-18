@@ -223,7 +223,7 @@ namespace WPFSerialAssistant
             if (rb != null)
             {
                 //
-                // todo可以将已经存在在文本框中的内容全部转换成指定形式显示，而不是简单地清空
+                //todo 可以将已经存在在文本框中的内容全部转换成指定形式显示，而不是简单地清空
                 //
                 recvDataRichTextBox.Document.Blocks.Clear();
 
